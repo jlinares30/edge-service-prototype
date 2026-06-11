@@ -1,6 +1,6 @@
 from datetime import datetime
 from monitoring.domain.repositories import IPropertyAssetRepository
-from monitoring.infrastructure.models import GasRecordModel
+from monitoring.infrastructure.models import TelemetryRecordModel
 from monitoring.infrastructure.client_service import CloudSaaSGatewayClient
 
 class TelemetryApplicationService:
@@ -23,8 +23,8 @@ class TelemetryApplicationService:
         # 3. Guardar el estado de los actuadores del Agregado
         self.repository.save(asset)
 
-        # 4. Registrar logs históricos locales para la auditoría y consumos
-        GasRecordModel.create(
+        # 4. Registrar logs históricos locales para la auditoría y consumos ($m^3$, kWh)
+        TelemetryRecordModel.create(
             device_id=device_id,
             gas_ppm=float(payload.get("gas_ppm", 0.0)),
             water_flow=float(payload.get("water_flow", 0.0)),

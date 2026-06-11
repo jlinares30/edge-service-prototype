@@ -1,7 +1,7 @@
 from peewee import Model, AutoField, CharField, FloatField, BooleanField, DateTimeField
 from shared.infrastructure.database import db
 
-class GasRecordModel(Model):
+class TelemetryRecordModel(Model):
     """Guarda el log histórico crudo de telemetría consolidada en el borde."""
     id = AutoField()
     device_id = CharField()
@@ -14,7 +14,7 @@ class GasRecordModel(Model):
 
     class Meta:
         database = db
-        table_name = 'gas_records'
+        table_name = 'telemetry_records'
 
 class PropertyAssetStateModel(Model):
     """Mapea el estado actual del Agregado de Dominio para persistir actuadores y modos."""

@@ -16,8 +16,8 @@ def init_db() -> None:
     
     # Importaciones diferidas
     from iam.infrastructure.models import Device as DeviceModel
-    from monitoring.infrastructure.models import GasRecordModel, PropertyAssetStateModel
+    from monitoring.infrastructure.models import TelemetryRecordModel, PropertyAssetStateModel
     
     # Crea las tablas si no existen en el archivo SQLite
-    db.create_tables([DeviceModel, GasRecordModel, PropertyAssetStateModel], safe=True)
+    db.create_tables([DeviceModel, TelemetryRecordModel, PropertyAssetStateModel], safe=True)
     db.close()

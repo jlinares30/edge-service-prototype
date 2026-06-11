@@ -16,10 +16,10 @@ def setup_edge_services():
         first_run = False
         db.connect()
         from iam.infrastructure.models import Device as DeviceModel
-        from monitoring.infrastructure.models import GasRecordModel, PropertyAssetStateModel
+        from monitoring.infrastructure.models import TelemetryRecordModel, PropertyAssetStateModel
         
         # Inicialización segura e idempotente en SQLite local
-        db.create_tables([DeviceModel, GasRecordModel, PropertyAssetStateModel], safe=True)
+        db.create_tables([DeviceModel, TelemetryRecordModel, PropertyAssetStateModel], safe=True)
         
         # Sembrar el dispositivo de pruebas del IAM
         from iam.application.services import AuthApplicationService
