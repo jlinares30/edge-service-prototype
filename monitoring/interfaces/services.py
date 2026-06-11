@@ -28,7 +28,7 @@ def ingest_iot_telemetry():
     try:
         device_id = data["device_id"]
         # Procesamiento unificado
-        response_data = telemetry_service.handle_telemetry(device_id, data)
+        response_data = telemetry_service.handle_incoming_telemetry(device_id, data)
         return jsonify(response_data), 200
 
     except ValueError as val_err:

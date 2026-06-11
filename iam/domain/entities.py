@@ -17,7 +17,7 @@ class Device:
 
     Attributes:
         device_id (str): Immutable, unique identifier for the device
-            (e.g. ``'smart-band-001'``).
+            (e.g. ``'gas-safety-unit-apt-402'``).
         api_key (str): Secret key used to authenticate HTTP requests
             originating from this device.  Transmitted via the
             ``X-API-Key`` header.

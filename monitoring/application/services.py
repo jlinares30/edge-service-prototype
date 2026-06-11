@@ -23,7 +23,7 @@ class TelemetryApplicationService:
         # 3. Guardar el estado de los actuadores del Agregado
         self.repository.save(asset)
 
-        # 4. Registrar logs históricos locales para la auditoría y consumos ($m^3$, kWh)
+        # 4. Registrar logs históricos locales para la auditoría y consumos
         GasRecordModel.create(
             device_id=device_id,
             gas_ppm=float(payload.get("gas_ppm", 0.0)),
@@ -34,7 +34,7 @@ class TelemetryApplicationService:
             created_at=datetime.utcnow()
         )
 
-        # 5. CONSOLIDACIÓN: Preparar el payload unificado total que requiere el Backend Cloud
+        # 5. Preparacion del payload unificado total para enviarselo al Backend Cloud
         cloud_payload = {
             "device_id": device_id,
             "apartment_id": asset.apartment_id,

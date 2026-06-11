@@ -5,7 +5,7 @@ class PropertyAsset:
     """Aggregate Root que representa el núcleo de control IoT de una vivienda en el Edge.
     
     Gestiona los estados de los actuadores, la configuración de seguridad perimetral
-    y centraliza las lecturas multivariables (Gas, Agua, Luz, Humo, Puertas).
+    y centraliza las lecturas multivariables (Gas, Agua, Luz, Puertas).
     """
 
     def __init__(

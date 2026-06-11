@@ -59,10 +59,10 @@ class DeviceRepository:
 
         Returns:
             Device: The :class:`~iam.domain.entities.Device` entity for
-            ``device_id='smart-band-001'``.
+            ``device_id='gas-safety-unit-apt-402'``.
         """
         device, _ = DeviceModel.get_or_create(
-            device_id="smart-band-001",
+            device_id="gas-safety-unit-apt-402",
             defaults={"api_key": "test-api-key-123", "created_at": "2025-06-04T23:23:00Z"},
         )
         return Device(device.device_id, device.api_key, device.created_at)

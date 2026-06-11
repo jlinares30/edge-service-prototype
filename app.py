@@ -26,8 +26,7 @@ def setup_edge_services():
         auth_service = AuthApplicationService()
         auth_service.get_or_create_test_device()
         
-        # NOTA: Eliminamos db.close() aquí para que la conexión siga abierta 
-        # y Flask pueda procesar el request actual que viene de Wokwi.
+        # db.close() es eliminado aquí para que la conexión siga abierta
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
