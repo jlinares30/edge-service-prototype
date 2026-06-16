@@ -69,22 +69,17 @@ class TelemetryApplicationService:
             created_at=datetime.utcnow()
         )
 
-        # 5. Prepare the unified payload for the Cloud Backend
+        # 5. Prepare the unified payload for the Cloud Backend (matching TelemetryPayloadDto)
+        unix_timestamp = int(datetime.utcnow().timestamp())
+        presence = 1 if (payload.get("motion_detected") or payload.get("door_open")) else 0
         cloud_payload = {
-            "device_id": device_id,
-            "apartment_id": asset.apartment_id,
-            "telemetry": payload,
-            "system_state": {
-                "is_security_mode_armed": asset.is_security_mode_armed,
-                "is_valve_closed": asset.is_valve_closed,
-                "is_door_locked": asset.is_door_locked
-            },
-            "evaluation": {
-                "severity": evaluation["severity"],
-                "alert_type": evaluation["alert_type"],
-                "message": evaluation["message"]
-            },
-            "timestamp": datetime.utcnow().isoformat()
+            "deviceId": device_id,
+            "timestamp": unix_timestamp,
+            "sensors": {
+                "waterLpm": float(payload.get("water_flow", 0.0)),
+                "gasPpm": float(payload.get("gas_ppm", 0.0)),
+                "presence": presence
+            }
         }
 
         # Asynchronous dispatch

@@ -10,7 +10,7 @@ class CloudSaaSGatewayClient:
     """
     def __init__(self):
         # Unified endpoint of the central Cloud Backend
-        self.cloud_sync_url = "https://api.nexora-platform.com/v1/cloud-sync/ingest"
+        self.cloud_sync_url = "https://api.nexora-platform.com/api/v1/telemetry"
 
     def dispatch_payload_to_cloud_async(self, data: dict):
         """Triggers an independent thread of execution to avoid network latency at the Edge."""
@@ -23,6 +23,6 @@ class CloudSaaSGatewayClient:
             # Transparent synchronization via REST API
             response = requests.post(self.cloud_sync_url, json=data, timeout=4)
             if response.status_code == 201:
-                print(f"[EDGE-TO-CLOUD SUCCESS] Payload indexed in the cloud for unit {data['apartment_id']}")
+                print(f"[EDGE-TO-CLOUD SUCCESS] Payload indexed in the cloud for device {data['deviceId']}")
         except requests.exceptions.RequestException:
             print("[CLOUD SYNC OFFLINE] Edge disconnected from the cloud. Local resilience active in SQLite.")
