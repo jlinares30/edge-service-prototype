@@ -59,31 +59,20 @@ class TelemetryApplicationService:
         self.repository.save(asset)
 
         # 4. Log historical data locally for auditing and consumption metrics
-        TelemetryRecordModel.create(
+        presence = 1 if (payload.get("motion_detected") or payload.get("door_open")) else 0
+        record = TelemetryRecordModel.create(
             device_id=device_id,
             gas_ppm=float(payload.get("gas_ppm", 0.0)),
             water_flow=float(payload.get("water_flow", 0.0)),
             electricity_kwh=float(payload.get("electricity_kwh", 0.0)),
             water_m3=float(payload.get("water_m3", 0.0)),
+            presence=presence,
             severity=evaluation["severity"],
             created_at=datetime.utcnow()
         )
 
-        # 5. Prepare the unified payload for the Cloud Backend (matching TelemetryPayloadDto)
-        unix_timestamp = int(datetime.utcnow().timestamp())
-        presence = 1 if (payload.get("motion_detected") or payload.get("door_open")) else 0
-        cloud_payload = {
-            "deviceId": device_id,
-            "timestamp": unix_timestamp,
-            "sensors": {
-                "waterLpm": float(payload.get("water_flow", 0.0)),
-                "gasPpm": float(payload.get("gas_ppm", 0.0)),
-                "presence": presence
-            }
-        }
-
-        # Asynchronous dispatch
-        self.cloud_client.dispatch_payload_to_cloud_async(cloud_payload)
+        # 5. Dispatch the record to the Cloud Backend asynchronously
+        self.cloud_client.dispatch_record_async(record.id)
 
         # Return immediate action directives in the HTTP response to the Embedded App
         return {

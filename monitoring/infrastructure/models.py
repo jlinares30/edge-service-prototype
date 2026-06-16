@@ -1,4 +1,4 @@
-from peewee import Model, AutoField, CharField, FloatField, BooleanField, DateTimeField
+from peewee import Model, AutoField, CharField, FloatField, BooleanField, DateTimeField, IntegerField
 from shared.infrastructure.database import db
 
 class TelemetryRecordModel(Model):
@@ -9,8 +9,10 @@ class TelemetryRecordModel(Model):
     water_flow = FloatField()
     electricity_kwh = FloatField()
     water_m3 = FloatField()
+    presence = IntegerField(default=0)
     severity = CharField()
     created_at = DateTimeField()
+    is_synced = BooleanField(default=False)
 
     class Meta:
         database = db
