@@ -1,29 +1,64 @@
+"""Application services for the monitoring bounded context.
+
+This module provides application services that orchestrate the use cases for
+the IoT monitoring system. These services coordinate domain objects,
+repositories, and external clients without containing any business logic themselves.
+"""
 from datetime import datetime
+from typing import Dict, Any
+
 from monitoring.domain.repositories import IPropertyAssetRepository
 from monitoring.infrastructure.models import TelemetryRecordModel
 from monitoring.infrastructure.client_service import CloudSaaSGatewayClient
+from monitoring.domain.entities import PropertyAsset
+
 
 class TelemetryApplicationService:
-    """Orquestador de Casos de Uso del ecosistema IoT unificado de Nexora."""
+    """Orchestrates use cases for the unified Nexora IoT ecosystem.
+
+    This service acts as a coordinator, handling incoming telemetry data,
+    delegating business rule evaluation to the domain layer, persisting state,
+    and dispatching information to external systems like the cloud backend.
+    """
 
     def __init__(self, repository: IPropertyAssetRepository):
+        """Initialises the service with its required dependencies.
+
+        Args:
+            repository (IPropertyAssetRepository): An implementation of the
+                repository interface for accessing property asset data.
+        """
         self.repository = repository
         self.cloud_client = CloudSaaSGatewayClient()
 
-    def handle_incoming_telemetry(self, device_id: str, payload: dict) -> dict:
-        # 1. Recuperar o inicializar de forma segura el Agregado del Dominio en el Borde
+    def handle_incoming_telemetry(self, device_id: str, payload: Dict[str, Any]) -> Dict[str, Any]:
+        """Processes incoming telemetry data for a given device.
+
+        This is the primary use case method. It retrieves the corresponding
+        ``PropertyAsset`` aggregate, delegates the telemetry processing to it,
+        persists the new state, logs the event, and dispatches the outcome to
+        the cloud. It finally returns immediate action commands to the IoT device.
+
+        Args:
+            device_id (str): The unique identifier of the device sending the telemetry.
+            payload (Dict[str, Any]): The raw telemetry data from the device.
+
+        Returns:
+            Dict[str, Any]: A response dictionary containing the processing
+            status and any immediate actions to be executed by the device.
+        """
+        # 1. Safely retrieve or initialize the Domain Aggregate at the Edge
         asset = self.repository.find_by_device_id(device_id)
         if not asset:
-            from monitoring.domain.entities import PropertyAsset
             asset = PropertyAsset(device_id=device_id, apartment_id=payload.get("apartment_id", "Apt-Unknown"))
 
-        # 2. Ejecución de lógica de negocio pura del dominio (Invariantes de alertas)
+        # 2. Execute pure domain business logic (alerting invariants)
         evaluation = asset.process_telemetry(payload)
 
-        # 3. Guardar el estado de los actuadores del Agregado
+        # 3. Save the state of the Aggregate's actuators
         self.repository.save(asset)
 
-        # 4. Registrar logs históricos locales para la auditoría y consumos ($m^3$, kWh)
+        # 4. Log historical data locally for auditing and consumption metrics
         TelemetryRecordModel.create(
             device_id=device_id,
             gas_ppm=float(payload.get("gas_ppm", 0.0)),
@@ -34,7 +69,7 @@ class TelemetryApplicationService:
             created_at=datetime.utcnow()
         )
 
-        # 5. Preparacion del payload unificado total para enviarselo al Backend Cloud
+        # 5. Prepare the unified payload for the Cloud Backend
         cloud_payload = {
             "device_id": device_id,
             "apartment_id": asset.apartment_id,
@@ -51,11 +86,11 @@ class TelemetryApplicationService:
             },
             "timestamp": datetime.utcnow().isoformat()
         }
-        
-        # Despacho asíncrono
+
+        # Asynchronous dispatch
         self.cloud_client.dispatch_payload_to_cloud_async(cloud_payload)
 
-        # Retornar directivas de acción física inmediata en la respuesta HTTP hacia el Embedded App
+        # Return immediate action directives in the HTTP response to the Embedded App
         return {
             "status": "PROCESSED",
             "valve_status": "CLOSED" if asset.is_valve_closed else "OPEN",
@@ -64,7 +99,18 @@ class TelemetryApplicationService:
         }
 
     def remote_toggle_security_mode(self, device_id: str, arm: bool) -> bool:
-        """Caso de Uso disparado desde la nube para cambiar el Modo Seguridad."""
+        """Use case triggered from the cloud to change the security mode.
+
+        Finds the relevant property asset and delegates the state change to it,
+        then persists the change.
+
+        Args:
+            device_id (str): The identifier of the target device.
+            arm (bool): ``True`` to arm the security system, ``False`` to disarm.
+
+        Returns:
+            bool: ``True`` if the asset was found and updated, ``False`` otherwise.
+        """
         asset = self.repository.find_by_device_id(device_id)
         if asset:
             asset.change_security_mode(arm)

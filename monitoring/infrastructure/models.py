@@ -2,7 +2,7 @@ from peewee import Model, AutoField, CharField, FloatField, BooleanField, DateTi
 from shared.infrastructure.database import db
 
 class TelemetryRecordModel(Model):
-    """Guarda el log histórico crudo de telemetría consolidada en el borde."""
+    """Saves the raw historical log of consolidated telemetry at the edge."""
     id = AutoField()
     device_id = CharField()
     gas_ppm = FloatField()
@@ -17,7 +17,7 @@ class TelemetryRecordModel(Model):
         table_name = 'telemetry_records'
 
 class PropertyAssetStateModel(Model):
-    """Mapea el estado actual del Agregado de Dominio para persistir actuadores y modos."""
+    """Maps the current state of the Domain Aggregate to persist actuators and modes."""
     device_id = CharField(primary_key=True)
     apartment_id = CharField()
     is_security_mode_armed = BooleanField(default=False)
